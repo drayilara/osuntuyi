@@ -1,33 +1,74 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import db from "@/firebase";
+import { Spin } from "antd";
 
-const CreateForm = ({setShowAdd}) => {
+const CreateForm = ({ setShowAdd, getAllPatients }) => {
   const [formData, setFormData] = useState({
-    age: '',
-    name: '',
-    insurance: '',
-    status: '',
-    diagnosis: '',
-    lastSeen: '',
-    hospitalNumber: ""
+    age: "",
+    name: "",
+    insurance: "",
+    status: "",
+    diagnosis: "",
+    lastSeen: "",
+    hospitalNumber: "",
   });
+  const [adding, setAdding] = useState(false);
 
-  const handleFormChange = event => {
+  const handleFormChange = (event) => {
     const { name, value } = event.target;
-    setFormData(prevData => ({
+    setFormData((prevData) => ({
       ...prevData,
-      [name]: value
+      [name]: value,
     }));
   };
 
-  const handleSubmit = event => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log('Form data:', formData);
+    console.log("Form data:", formData);
     // You can perform further actions with the collected form data
+    const {
+      age,
+      name,
+      insurance,
+      status,
+      diagnosis,
+      lastSeen,
+      hospitalNumber,
+    } = formData;
+
+    console.log(formData);
+
+    if (
+      age &&
+      name &&
+      insurance &&
+      status &&
+      diagnosis &&
+      lastSeen &&
+      hospitalNumber
+    ) {
+      //submit form
+      // Add a new document with a generated id.
+      setAdding(true)
+      const docRef = await addDoc(collection(db, "patients"), {
+        ...formData,
+        admissionDate: serverTimestamp(),
+      });
+
+      if (docRef.id) {
+        await getAllPatients();
+        setShowAdd(false);
+      }
+      setAdding(false);
+    } else {
+      alert("Please complete all fields");
+    }
   };
 
   return (
     <div className="min-h-screen  flex justify-center items-center">
-      <div className="p-8 rounded shadow-md  w-[60%]">
+      <div className="p-8 rounded shadow-md w-full md:w-[70%] mt-4">
         <h2 className="text-xl font-semibold mb-6">Patient Information</h2>
         <form onSubmit={handleSubmit}>
           {/* Age */}
@@ -82,10 +123,9 @@ const CreateForm = ({setShowAdd}) => {
               onChange={handleFormChange}
               className="mt-1 p-2 block w-full rounded-md  shadow-sm border border-blue-300 focus:ring focus:ring-blue-200"
             />
-                  </div>
-                  
+          </div>
 
-                    <div className="mb-4">
+          <div className="mb-4">
             <label
               htmlFor="insurance"
               className="block text-sm font-medium text-gray-700"
@@ -95,7 +135,7 @@ const CreateForm = ({setShowAdd}) => {
             <input
               type="text"
               id="insurance"
-              name="insurance"
+              name="hospitalNumber"
               value={formData.hospitalNumber}
               onChange={handleFormChange}
               className="mt-1 p-2 block w-full rounded-md  shadow-sm border border-blue-300 focus:ring focus:ring-blue-200"
@@ -117,10 +157,13 @@ const CreateForm = ({setShowAdd}) => {
               onChange={handleFormChange}
               className="mt-1 p-2 block w-full rounded-md  shadow-sm border border-blue-300 focus:ring focus:ring-blue-200"
             >
+              <option disabled selected value="">
+                Select an option
+              </option>
               <option value="stable">Stable</option>
               <option value="improving">Improving</option>
               <option value="critical">Critical</option>
-                    </select>
+            </select>
           </div>
 
           {/* Diagnosis */}
@@ -159,21 +202,21 @@ const CreateForm = ({setShowAdd}) => {
             />
           </div>
 
-            <div className="flex gap-x-4">
-          <button
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-          >
-            Submit
-        </button>
-                  
-        <button
-            onClick={() => setShowAdd(false)}
-            type="button"
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-          >
-            Cancel
-          </button>
+          <div className="flex gap-4 flex-wrap ">
+            <button
+              type="submit"
+              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
+            >
+              {adding ? <Spin /> : "Submit"}
+            </button>
+
+            <button
+              onClick={() => setShowAdd(false)}
+              type="button"
+              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
+            >
+              Cancel
+            </button>
           </div>
         </form>
       </div>

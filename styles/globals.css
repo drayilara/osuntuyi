@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa&display=swap');
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
@@ -20,4 +22,9 @@ body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+
+.ant-spin-dot-item {
+  background-color: whitesmoke !important;
 }
